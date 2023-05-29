@@ -22,3 +22,32 @@ class CustomUser(AbstractUser):
 
     def __str__(self):
         return self.email
+
+
+class Client(models.Model):
+    first_name = models.CharField(max_length=25)
+    last_name = models.CharField(max_length=25)
+    email = models.EmailField("email address")
+    phone = models.CharField(max_length=20)
+    mobile = models.CharField(max_length=20)
+    company_name = models.CharField(max_length=200)
+    date_creation = models.DateTimeField(auto_now_add=True)
+    date_update = models.DateTimeField(auto_now=True)
+    sales = models.ForeignKey(to=CustomUser, on_delete=models.CASCADE)
+
+
+class Contract(models.Model):
+    value = models.IntegerField()
+    client = models.ForeignKey(to=Client, on_delete=models.CASCADE)
+    sales = models.ForeignKey(to=CustomUser, on_delete=models.CASCADE)
+    time_created = models.DateTimeField(auto_now_add=True)
+    status = True
+
+
+class Event(models.Model):
+    title = models.CharField(max_length=50, null=True)
+    time_created = models.DateTimeField(auto_now_add=True)
+    contract = models.OneToOneField(Contract, on_delete=models.CASCADE)
+    date = models.DateTimeField(null=True)
+    support = models.ForeignKey(to=CustomUser, on_delete=models.CASCADE, null=True)
+

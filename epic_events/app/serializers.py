@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import CustomUser
+from .models import CustomUser, Client
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -34,4 +34,20 @@ class UserSerializer(serializers.ModelSerializer):
             user.is_staff = True
             user.save()
         return user
+
+
+class ClientSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Client
+        fields = [
+            'id', 'first_name', 'last_name', 'email', 'phone', 'mobile', 'company_name',
+            'date_creation', 'date_update', 'sales'
+        ]
+        extra_kwargs = {
+            'id': {'read_only': True},
+            'date_creation': {'read_only': True},
+            'date_update': {'read_only': True},
+            'sales': {'read_only': True},
+        }
 
