@@ -4,9 +4,9 @@ from django.db import models
 from .managers import CustomUserManager
 
 roles_list = [
-    ('Sales', 'Sales'),
-    ('Support', 'Support'),
-    ('Staff', 'Staff')
+    ('sales', 'sales'),
+    ('support', 'support'),
+    ('staff', 'staff')
 ]
 
 
