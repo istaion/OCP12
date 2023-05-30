@@ -38,11 +38,13 @@ class Client(models.Model):
 
 
 class Contract(models.Model):
-    value = models.IntegerField()
+    amount = models.IntegerField()
     client = models.ForeignKey(to=Client, on_delete=models.CASCADE)
     sales = models.ForeignKey(to=CustomUser, on_delete=models.CASCADE)
-    time_created = models.DateTimeField(auto_now_add=True)
-    status = True
+    date_creation = models.DateTimeField(auto_now_add=True)
+    date_update = models.DateTimeField(auto_now=True)
+    payment_due = models.DateTimeField(null=True)
+    signed = models.BooleanField(default=False)
 
 
 class Event(models.Model):

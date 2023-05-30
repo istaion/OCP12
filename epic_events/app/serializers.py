@@ -1,5 +1,5 @@
 from rest_framework import serializers
-from .models import CustomUser, Client
+from .models import CustomUser, Client, Contract
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -49,3 +49,14 @@ class ClientSerializer(serializers.ModelSerializer):
             'sales': {'read_only': True},
         }
 
+
+class ContractSerializer(serializers.ModelSerializer):
+
+    class Meta:
+        model = Contract
+        fields = "__all__"
+        extra_kwargs = {
+            'id': {'read_only': True},
+            'sales': {'read_only': True},
+            'time_created': {'read_only': True},
+        }

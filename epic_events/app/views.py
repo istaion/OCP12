@@ -3,8 +3,8 @@ from rest_framework import status
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
-from .models import CustomUser, Client
-from .serializers import UserSerializer, ClientSerializer
+from .models import CustomUser, Client, Contract
+from .serializers import UserSerializer, ClientSerializer, ContractSerializer
 
 
 class UserRegistrationView(ModelViewSet):
@@ -41,7 +41,7 @@ class ClientView(ModelViewSet):
                 client.save()
                 return Response(serializer.data, status=status.HTTP_200_OK)
             else:
-                message = 'Only sales user can create clients'
+                message = 'Only sales users can create clients'
                 return Response({'message': message}, status=status.HTTP_400_BAD_REQUEST)
 
     @staticmethod
@@ -56,11 +56,10 @@ class ClientUniqueView(ModelViewSet):
     queryset = Client.objects.all()
     permission_classes = [IsAuthenticated]
 
-    @staticmethod
-    def get(request, *args, **kwargs):
-        instance = Client.objects.get(id=kwargs['client_id'])
-        serializer = ClientSerializer(instance, many=False)
-        return Response(serializer, status=status.HTTP_200_OK)
+    def info(self, request, *args, **kwargs):
+        obj = get_object_or_404(Client, id=kwargs['client_id'])
+        serializer = ClientSerializer(obj)
+        return Response(serializer.data, status=status.HTTP_200_OK)
 
     def update(self, request, *args, **kwargs):
         obj = get_object_or_404(Client, id=kwargs['client_id'])
@@ -78,3 +77,56 @@ class ClientUniqueView(ModelViewSet):
         message = 'You deleted the client'
         return Response({'message': message},
                         status=status.HTTP_204_NO_CONTENT)
+
+
+class ContractsView(ModelViewSet):
+    serializer_class = ContractSerializer
+    queryset = Contract.objects.all()
+    permission_classes = [IsAuthenticated]
+
+    def list(self, request, *args, **kwargs):
+        instances = Contract.objects.all()
+        serializer = ContractSerializer(instances, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def create(self, request, *args, **kwargs):
+        serializer = ContractSerializer(data=request.data)
+        if serializer.is_valid():
+            if request.user.role == "sales":
+                contract = serializer.save(sales=request.user)
+                contract.save()
+                return Response(serializer.data, status=status.HTTP_200_OK)
+            else:
+                message = str("Only sales users can create contract")
+                return Response({"message": message}, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST )
+
+
+class ContractUniqueView(ModelViewSet):
+    serializer_class = ContractSerializer
+    queryset = Contract.objects.all()
+    permission_classes = [IsAuthenticated]
+
+    def get(self, request, *args, **kwargs):
+        instance = get_object_or_404(Contract, id=kwargs['contract_id'])
+        serializer = ContractSerializer(instance)
+        return Response(serializer.data, status=status.HTTP_200_OK)
+
+    def update(self, request, *args, **kwargs):
+        obj = get_object_or_404(Contract, id=kwargs['contract_id'])
+        instance = Contract.objects.get(id=kwargs['contract_id'])
+        serializer = ContractSerializer(instance, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        else:
+            return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, *args, ** kwargs):
+        obj = get_object_or_404(Contract, id=kwargs['contract_id'])
+        self.perform_destroy(obj)
+        message = 'You deleted the contract'
+        return Response({'message': message},
+                        status=status.HTTP_204_NO_CONTENT)
+
