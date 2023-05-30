@@ -1,4 +1,4 @@
-from django.shortcuts import render
+from django.shortcuts import get_object_or_404
 from rest_framework import status
 from rest_framework.viewsets import ModelViewSet
 from rest_framework.permissions import AllowAny, IsAuthenticated
@@ -41,7 +41,7 @@ class ClientView(ModelViewSet):
                 client.save()
                 return Response(serializer.data, status=status.HTTP_200_OK)
             else:
-                message = 'Only sales user can create customers'
+                message = 'Only sales user can create clients'
                 return Response({'message': message}, status=status.HTTP_400_BAD_REQUEST)
 
     @staticmethod
@@ -49,3 +49,32 @@ class ClientView(ModelViewSet):
         instances = Client.objects.all()
         serializer = ClientSerializer(instances, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
+
+
+class ClientUniqueView(ModelViewSet):
+    serializer_class = ClientSerializer
+    queryset = Client.objects.all()
+    permission_classes = [IsAuthenticated]
+
+    @staticmethod
+    def get(request, *args, **kwargs):
+        instance = Client.objects.get(id=kwargs['client_id'])
+        serializer = ClientSerializer(instance, many=False)
+        return Response(serializer, status=status.HTTP_200_OK)
+
+    def update(self, request, *args, **kwargs):
+        obj = get_object_or_404(Client, id=kwargs['client_id'])
+        instance = Client.objects.get(id=kwargs['client_id'])
+        serializer = ClientSerializer(instance, data=request.data, partial=True)
+        if serializer.is_valid():
+            serializer.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
+        return Response(serializer.errors,
+                        status=status.HTTP_400_BAD_REQUEST)
+
+    def delete(self, request, *args, **kwargs):
+        obj = get_object_or_404(Client, id=kwargs['client_id'])
+        self.perform_destroy(obj)
+        message = 'You deleted the client'
+        return Response({'message': message},
+                        status=status.HTTP_204_NO_CONTENT)
