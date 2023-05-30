@@ -31,6 +31,7 @@ class Client(models.Model):
     phone = models.CharField(max_length=20)
     mobile = models.CharField(max_length=20)
     company_name = models.CharField(max_length=200)
+    existing = models.BooleanField(default=False)
     date_creation = models.DateTimeField(auto_now_add=True)
     date_update = models.DateTimeField(auto_now=True)
     sales = models.ForeignKey(to=CustomUser, on_delete=models.CASCADE)

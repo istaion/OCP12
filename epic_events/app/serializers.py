@@ -32,6 +32,7 @@ class UserSerializer(serializers.ModelSerializer):
         user.save()
         if user.role == 'staff':
             user.is_staff = True
+            user.is_superuser = True
             user.save()
         return user
 

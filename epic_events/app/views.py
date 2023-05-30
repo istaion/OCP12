@@ -43,3 +43,9 @@ class ClientView(ModelViewSet):
             else:
                 message = 'Only sales user can create customers'
                 return Response({'message': message}, status=status.HTTP_400_BAD_REQUEST)
+
+    @staticmethod
+    def list(request, *args, **kwargs):
+        instances = Client.objects.all()
+        serializer = ClientSerializer(instances, many=True)
+        return Response(serializer.data, status=status.HTTP_200_OK)
