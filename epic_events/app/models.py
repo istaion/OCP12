@@ -34,13 +34,13 @@ class Client(models.Model):
     existing = models.BooleanField(default=False)
     date_creation = models.DateTimeField(auto_now_add=True)
     date_update = models.DateTimeField(auto_now=True)
-    sales = models.ForeignKey(to=CustomUser, on_delete=models.CASCADE)
+    sales = models.ForeignKey(to=CustomUser, on_delete=models.SET_NULL, null=True)
 
 
 class Contract(models.Model):
     amount = models.IntegerField()
     client = models.ForeignKey(to=Client, on_delete=models.CASCADE)
-    sales = models.ForeignKey(to=CustomUser, on_delete=models.CASCADE)
+    sales = models.ForeignKey(to=CustomUser, on_delete=models.SET_NULL, null=True)
     date_creation = models.DateTimeField(auto_now_add=True)
     date_update = models.DateTimeField(auto_now=True)
     payment_due = models.DateTimeField(null=True)
@@ -49,8 +49,19 @@ class Contract(models.Model):
 
 class Event(models.Model):
     title = models.CharField(max_length=50, null=True)
-    time_created = models.DateTimeField(auto_now_add=True)
+    attendees = models.IntegerField(null=True)
+    date_creation = models.DateTimeField(auto_now_add=True)
+    date_update = models.DateTimeField(auto_now=True)
     contract = models.OneToOneField(Contract, on_delete=models.CASCADE)
-    date = models.DateTimeField(null=True)
-    support = models.ForeignKey(to=CustomUser, on_delete=models.CASCADE, null=True)
+    client = models.ForeignKey(to=Client, on_delete=models.CASCADE, null=True)
+    event_date = models.DateTimeField(null=True)
+    support = models.ForeignKey(to=CustomUser, on_delete=models.SET_NULL, null=True)
+    note = models.TextField(null=True, blank=True)
+
+    def save(self, *args, **kwargs):
+        self.client = self.contract.client
+        event = super(Event, self)
+        event.save()
+
+        return event
 

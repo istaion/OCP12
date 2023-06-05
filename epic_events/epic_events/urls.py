@@ -1,6 +1,11 @@
 from django.contrib import admin
 from django.urls import path, include
-from app.views import UserRegistrationView, ClientView, ClientUniqueView, ContractsView, ContractUniqueView
+from app.views import (
+    UserRegistrationView,
+    ClientView, ClientUniqueView,
+    ContractsView, ContractUniqueView,
+    EventsView, EventUniqueView
+    )
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
 
 
@@ -12,5 +17,7 @@ urlpatterns = [
     path('client/<client_id>/', ClientUniqueView.as_view({'get': 'info', 'put': 'update', 'delete': 'delete'})),
     path('contract/', ContractsView.as_view({'post': 'create', 'get': 'list'})),
     path('contract/<contract_id>/', ContractUniqueView.as_view({'get': 'get', 'put': 'update', 'delete': 'delete'})),
+    path('event/', EventsView.as_view({'post': 'create', 'get': 'list'})),
+    path('event/<event_id>/', EventUniqueView.as_view({'get': 'get', 'put': 'update', 'delete': 'delete'})),
     path('admin/', admin.site.urls),
 ]
