@@ -5,6 +5,7 @@ from rest_framework.permissions import AllowAny, IsAuthenticated
 from rest_framework.response import Response
 from .models import CustomUser, Client, Contract, Event
 from .serializers import UserSerializer, ClientSerializer, ContractSerializer, EventSerializer
+from .permissions import HasClientPermissions
 
 
 class UserRegistrationView(ModelViewSet):
@@ -30,7 +31,7 @@ class UserRegistrationView(ModelViewSet):
 class ClientView(ModelViewSet):
     serializer_class = ClientSerializer
     queryset = Client.objects.all()
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, HasClientPermissions]
 
     @staticmethod
     def create(request, *args, **kwargs):
@@ -45,9 +46,12 @@ class ClientView(ModelViewSet):
                 return Response({'message': message}, status=status.HTTP_400_BAD_REQUEST)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
-    @staticmethod
-    def list(request, *args, **kwargs):
-        instances = Client.objects.all()
+
+    def list(self, request, *args, **kwargs):
+        if request.user.role == "support":
+            instances = Client.objects.filter(contract__event__support=self.request.user)
+        else:
+            instances = Client.objects.all()
         serializer = ClientSerializer(instances, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
@@ -55,15 +59,17 @@ class ClientView(ModelViewSet):
 class ClientUniqueView(ModelViewSet):
     serializer_class = ClientSerializer
     queryset = Client.objects.all()
-    permission_classes = [IsAuthenticated]
+    permission_classes = [IsAuthenticated, HasClientPermissions]
 
     def info(self, request, *args, **kwargs):
         obj = get_object_or_404(Client, id=kwargs['client_id'])
+        self.check_object_permissions(self.request, obj)
         serializer = ClientSerializer(obj)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
     def update(self, request, *args, **kwargs):
         obj = get_object_or_404(Client, id=kwargs['client_id'])
+        self.check_object_permissions(self.request, obj)
         instance = Client.objects.get(id=kwargs['client_id'])
         serializer = ClientSerializer(instance, data=request.data, partial=True)
         if serializer.is_valid():
@@ -74,6 +80,7 @@ class ClientUniqueView(ModelViewSet):
 
     def delete(self, request, *args, **kwargs):
         obj = get_object_or_404(Client, id=kwargs['client_id'])
+        self.check_object_permissions(self.request, obj)
         self.perform_destroy(obj)
         message = 'You deleted the client'
         return Response({'message': message},
@@ -145,13 +152,9 @@ class EventsView(ModelViewSet):
     def create(self, request, *args, **kwargs):
         serializer = EventSerializer(data=request.data)
         if serializer.is_valid():
-            if request.user.role == "support":
-                event = serializer.save(support=request.user)
-                event.save()
-                return Response(serializer.data, status=status.HTTP_200_OK)
-            else:
-                message = str("Only support users can create event")
-                return Response({"message": message}, status=status.HTTP_200_OK)
+            event = serializer.save(support=request.user)
+            event.save()
+            return Response(serializer.data, status=status.HTTP_200_OK)
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
