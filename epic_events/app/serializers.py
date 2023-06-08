@@ -74,3 +74,4 @@ class EventSerializer(serializers.ModelSerializer):
             'date_creation': {'read_only': True},
             'date_update': {'read_only': True},
         }
+
