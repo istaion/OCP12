@@ -2,22 +2,22 @@ from django.contrib import admin
 from django.urls import path, include
 from app.views import (
     UserRegistrationView,
-    ClientView, ClientUniqueView,
-    ContractsView, ContractUniqueView,
-    EventsView, EventUniqueView
+    ClientView,
+    ContractsView,
+    EventsView,
     )
 from rest_framework_simplejwt.views import TokenObtainPairView, TokenRefreshView
+from rest_framework.routers import DefaultRouter, SimpleRouter
 
+router = DefaultRouter()
+router.register("client", ClientView, basename="client")
+router.register("contract", ContractsView, basename="contract")
+router.register("event", EventsView, basename="event")
 
 urlpatterns = [
     path('registrate/', UserRegistrationView.as_view({'post': 'create'})),
     path('login/', TokenObtainPairView.as_view(), name='login'),
     path('login/refresh/', TokenRefreshView.as_view(), name='token_refresh'),
-    path('client/', ClientView.as_view({'post': 'create', 'get': 'list'})),
-    path('client/<client_id>/', ClientUniqueView.as_view({'get': 'info', 'put': 'update', 'delete': 'delete'})),
-    path('contract/', ContractsView.as_view({'post': 'create', 'get': 'list'})),
-    path('contract/<contract_id>/', ContractUniqueView.as_view({'get': 'get', 'put': 'update', 'delete': 'delete'})),
-    path('event/', EventsView.as_view({'post': 'create', 'get': 'list'})),
-    path('event/<event_id>/', EventUniqueView.as_view({'get': 'get', 'put': 'update', 'delete': 'delete'})),
+    path('', include(router.urls)),
     path('admin/', admin.site.urls),
 ]

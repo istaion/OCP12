@@ -14,7 +14,7 @@ class UserRegistrationView(ModelViewSet):
     serializer_class = UserSerializer
 
     @staticmethod
-    def create(request, *args, **kwargs):
+    def create(request):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
             serializer.create_user(email=request.data["email"],
@@ -34,7 +34,7 @@ class ClientView(ModelViewSet):
     permission_classes = [IsAuthenticated, HasClientPermissions]
 
     @staticmethod
-    def create(request, *args, **kwargs):
+    def create(request):
         serializer = ClientSerializer(data=request.data)
         if serializer.is_valid():
             client = serializer.save(sales=request.user)
@@ -43,7 +43,7 @@ class ClientView(ModelViewSet):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def list(self, request, *args, **kwargs):
+    def list(self, request):
         if request.user.role == "support":
             instances = Client.objects.filter(contract__event__support=self.request.user)
         else:
@@ -51,22 +51,16 @@ class ClientView(ModelViewSet):
         serializer = ClientSerializer(instances, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-
-class ClientUniqueView(ModelViewSet):
-    serializer_class = ClientSerializer
-    queryset = Client.objects.all()
-    permission_classes = [IsAuthenticated, HasClientPermissions]
-
-    def info(self, request, *args, **kwargs):
-        obj = get_object_or_404(Client, id=kwargs["client_id"])
+    def retrieve(self, request, pk=None):
+        obj = get_object_or_404(Client, id=pk)
         self.check_object_permissions(self.request, obj)
         serializer = ClientSerializer(obj)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def update(self, request, *args, **kwargs):
-        obj = get_object_or_404(Client, id=kwargs["client_id"])
+    def update(self, request, pk=None):
+        obj = get_object_or_404(Client, id=pk)
         self.check_object_permissions(self.request, obj)
-        instance = Client.objects.get(id=kwargs["client_id"])
+        instance = Client.objects.get(id=pk)
         serializer = ClientSerializer(instance, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -74,8 +68,8 @@ class ClientUniqueView(ModelViewSet):
         return Response(serializer.errors,
                         status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request, *args, **kwargs):
-        obj = get_object_or_404(Client, id=kwargs["client_id"])
+    def destroy(self, request, pk=None):
+        obj = get_object_or_404(Client, id=pk)
         self.check_object_permissions(self.request, obj)
         self.perform_destroy(obj)
         message = "You deleted the client"
@@ -88,7 +82,7 @@ class ContractsView(ModelViewSet):
     queryset = Contract.objects.all()
     permission_classes = [IsAuthenticated, HasContractPermissions]
 
-    def list(self, request, *args, **kwargs):
+    def list(self, request):
         if request.user.role == "support":
             instances = Contract.objects.filter(event__support=self.request.user)
         else:
@@ -96,7 +90,7 @@ class ContractsView(ModelViewSet):
         serializer = ContractSerializer(instances, many=True)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def create(self, request, *args, **kwargs):
+    def create(self, request):
         serializer = ContractSerializer(data=request.data)
         if serializer.is_valid():
             contract = serializer.save(sales=request.user)
@@ -105,21 +99,15 @@ class ContractsView(ModelViewSet):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-class ContractUniqueView(ModelViewSet):
-    serializer_class = ContractSerializer
-    queryset = Contract.objects.all()
-    permission_classes = [IsAuthenticated, HasContractPermissions]
-
-    def get(self, request, *args, **kwargs):
-        instance = get_object_or_404(Contract, id=kwargs["contract_id"])
+    def retrieve(self, request, pk=None):
+        instance = get_object_or_404(Contract, id=pk)
         serializer = ContractSerializer(instance)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def update(self, request, *args, **kwargs):
-        obj = get_object_or_404(Contract, id=kwargs["contract_id"])
+    def update(self, request, pk=None):
+        obj = get_object_or_404(Contract, id=pk)
         self.check_object_permissions(self.request, obj)
-        instance = Contract.objects.get(id=kwargs["contract_id"])
+        instance = Contract.objects.get(id=pk)
         serializer = ContractSerializer(instance, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -127,8 +115,8 @@ class ContractUniqueView(ModelViewSet):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request, *args, ** kwargs):
-        obj = get_object_or_404(Contract, id=kwargs["contract_id"])
+    def destroy(self, request, pk=None):
+        obj = get_object_or_404(Contract, id=pk)
         self.check_object_permissions(self.request, obj)
         self.perform_destroy(obj)
         message = "You deleted the contract"
@@ -159,21 +147,15 @@ class EventsView(ModelViewSet):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-
-class EventUniqueView(ModelViewSet):
-    serializer_class = EventSerializer
-    queryset = Event.objects.all()
-    permission_classes = [IsAuthenticated, HasEventPermissions]
-
-    def get(self, request, *args, **kwargs):
-        instance = get_object_or_404(Event, id=kwargs["event_id"])
+    def retrieve(self, request, pk=None):
+        instance = get_object_or_404(Event, id=pk)
         serializer = EventSerializer(instance)
         return Response(serializer.data, status=status.HTTP_200_OK)
 
-    def update(self, request, *args, **kwargs):
-        obj = get_object_or_404(Event, id=kwargs["event_id"])
+    def update(self, request, pk=None):
+        obj = get_object_or_404(Event, id=pk)
         self.check_object_permissions(self.request, obj)
-        instance = Event.objects.get(id=kwargs["event_id"])
+        instance = Event.objects.get(id=pk)
         serializer = EventSerializer(instance, data=request.data, partial=True)
         if serializer.is_valid():
             serializer.save()
@@ -181,8 +163,8 @@ class EventUniqueView(ModelViewSet):
         else:
             return Response(serializer.errors, status=status.HTTP_400_BAD_REQUEST)
 
-    def delete(self, request, *args, ** kwargs):
-        obj = get_object_or_404(Event, id=kwargs["event_id"])
+    def destroy(self, request, pk=None):
+        obj = get_object_or_404(Event, id=pk)
         self.check_object_permissions(self.request, obj)
         self.perform_destroy(obj)
         message = "You deleted the event"
