@@ -53,3 +53,7 @@ python manage.py migrate
 python manage.py runserver
 ```
 
+### Postman :
+
+Vous pouvez retrouver les points d'accés dans la doc :
+[documentation API](https://documenter.getpostman.com/view/15931927/2s93z584Fb)

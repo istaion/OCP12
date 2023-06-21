@@ -14,6 +14,8 @@ class CustomUser(AbstractUser):
     username = None
     role = models.CharField(max_length=25, choices=roles_list, null=False)
     email = models.EmailField("email address", unique=True)
+    first_name = models.CharField(max_length=25, null=True, blank=True)
+    last_name = models.CharField(max_length=25, null=True, blank=True)
 
     USERNAME_FIELD = "email"
     REQUIRED_FIELDS = []
