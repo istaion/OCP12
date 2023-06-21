@@ -17,10 +17,16 @@ class UserRegistrationView(ModelViewSet):
     def create(request):
         serializer = UserSerializer(data=request.data)
         if serializer.is_valid():
+            last_name = None
+            if "last_name" in request.data:
+                last_name = request.data["last_name"]
+            first_name = None
+            if "first_name" in request.data:
+                first_name = request.data["first_name"]
             serializer.create_user(email=request.data["email"],
-                                   last_name=request.data["last_name"],
+                                   last_name=last_name,
                                    password=request.data["password"],
-                                   first_name=request.data["first_name"],
+                                   first_name=first_name,
                                    role=request.data["role"])
             return Response(serializer.data, status=status.HTTP_201_CREATED)
         else:

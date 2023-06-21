@@ -18,10 +18,6 @@ class UserSerializer(serializers.ModelSerializer):
             raise ValueError('Users must have an email address')
         if not password:
             raise ValueError('Users must have a password')
-        if not last_name:
-            last_name = ''
-        if not first_name:
-            first_name = ''
         user = CustomUser.objects.create(
             email=email,
             role=role,
